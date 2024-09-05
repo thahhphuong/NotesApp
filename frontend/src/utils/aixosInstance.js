@@ -1,6 +1,6 @@
 import axios from "axios"
 import { BASE_URL } from "./constants";
-const instance = axios.create({
+const axisoInstance = axios.create({
     baseURL: BASE_URL,
     timeout: 10000,
     headers: {
@@ -8,7 +8,7 @@ const instance = axios.create({
     }
 });
 // Add a request interceptor
-axios.interceptors.request.use(function (config) {
+axisoInstance.interceptors.request.use(function (config) {
     const accessToken = localStorage.getItem("token")
     if (accessToken) {
         config.headers.Authorization = `Bearer ${accessToken}`
@@ -29,4 +29,4 @@ axios.interceptors.request.use(function (config) {
 //     // Do something with response error
 //     return Promise.reject(error);
 // });
-export default instance
+export default axisoInstance

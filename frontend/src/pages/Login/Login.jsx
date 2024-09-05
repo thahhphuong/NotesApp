@@ -1,12 +1,15 @@
 import React, { useState } from "react";
 import Navbar from "../../components/Navbar/Navbar";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import PasswordInput from "../../components/Password/PasswordInput";
 import { validateEmail } from "../../utils/helper";
+import axisoInstance from "../../utils/aixosInstance";
+import { BASE_URL } from "../../utils/constants";
 const Login = () => {
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
 	const [error, setError] = useState(false);
+	const navigite = useNavigate();
 	const handleLogin = async (e) => {
 		e.preventDefault();
 		if (!validateEmail(email) && email) {
@@ -19,6 +22,24 @@ const Login = () => {
 		}
 		setError("");
 		// TODO: API CALL
+		try {
+			const response = await axisoInstance.post(`${BASE_URL}/login`, {
+				email: email,
+				password: password,
+			});
+			const { data } = response;
+			// set token to local
+			if (data) {
+				localStorage.setItem("token", data.data.token);
+				navigite("/");
+			}
+		} catch (error) {
+			if (error.response.data.message) {
+				setError(error.response.data.message);
+			} else {
+				setError("Some thing was wrong in login ");
+			}
+		}
 	};
 	return (
 		<>

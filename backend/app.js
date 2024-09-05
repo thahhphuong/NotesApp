@@ -3,6 +3,7 @@ const mongoose = require("mongoose")
 const config = require("./config.json")
 const User = require("./models/user.model")
 const jwt = require("jsonwebtoken")
+const cors = require('cors')
 const { authenticateToken } = require('./untils/jwt')
 const Note = require('./models/note.model')
 require('dotenv').config()
@@ -12,7 +13,13 @@ mongoose.connection.on('error', err => {
     console.log(err);
 });
 const app = express()
-
+const issue2options = {
+    origin: true,
+    methods: ["POST"],
+    credentials: true,
+    maxAge: 3600
+};
+app.use(cors(issue2options))
 app.use(express.json())
 app.get('/', function (req, res) {
     res.send('Hello World')
