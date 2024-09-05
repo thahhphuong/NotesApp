@@ -3,7 +3,7 @@ import Profile from "../Card/Profile";
 import { useNavigate } from "react-router-dom";
 import SearchBar from "../SearchBar/SearchBar";
 
-function Navbar() {
+function Navbar({ userInfo }) {
 	const navigite = useNavigate();
 	const [search, setSearch] = useState("");
 	const onLogout = () => {
@@ -18,7 +18,7 @@ function Navbar() {
 			<h2 className="btn btn-ghost text-xl">NotesApp</h2>
 
 			<SearchBar value={search} onChange={(e) => setSearch(e.target.value)} handleSearch={handleSearch} onClearSearch={onClearSearch} />
-			<Profile onLogout={onLogout} />
+			<Profile userInfo={userInfo} onLogout={onLogout} />
 		</div>
 	);
 }

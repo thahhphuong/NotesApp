@@ -27,10 +27,10 @@ const Login = () => {
 				email: email,
 				password: password,
 			});
-			const { data } = response;
+			const { data } = response.data;
 			// set token to local
 			if (data) {
-				localStorage.setItem("token", data.data.token);
+				localStorage.setItem("token", data.token);
 				navigite("/");
 			}
 		} catch (error) {

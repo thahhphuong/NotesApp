@@ -1,17 +1,25 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Navbar from "../../components/Navbar/Navbar";
 import NoteCard from "../../components/Card/NoteCard";
 import { MdAdd } from "react-icons/md";
 import AddNote from "./AddNote";
 import Modal from "react-modal";
+import axios from "axios";
+import { BASE_URL } from "../../utils/constants";
+import { useNavigate } from "react-router-dom";
+import axisoInstance from "../../utils/aixosInstance";
 const Home = () => {
-	const [modalIsOpen, setIsOpen] = React.useState(false);
+	const navigite = useNavigate();
+
+	const [modalIsOpen, setIsOpen] = useState(false);
+	const [user, serUser] = useState(null);
 	const openModal = () => {
 		setIsOpen(true);
 	};
 	const closeModal = () => {
 		setIsOpen(false);
 	};
+
 	const customStyles = {
 		content: {
 			top: "50%",
@@ -26,9 +34,27 @@ const Home = () => {
 		// references are now sync'd and can be accessed.
 		subtitle.style.color = "#f00";
 	}
+	const userInfo = async () => {
+		try {
+			const response = await axisoInstance.get(`${BASE_URL}/information`);
+			const { data } = response.data;
+			if (data) {
+				serUser(data);
+			}
+		} catch (error) {
+			// if (data.error) {
+			// 	navigite("/login");
+			// }
+			console.log(error);
+		}
+	};
+	useEffect(() => {
+		userInfo();
+		return () => {};
+	}, []);
 	return (
 		<>
-			<Navbar />
+			<Navbar userInfo={user} />
 
 			<div className="container mx-auto">
 				<div className="grid grid-cols-3 gap-4 mt-8">

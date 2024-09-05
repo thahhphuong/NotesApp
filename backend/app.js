@@ -15,7 +15,7 @@ mongoose.connection.on('error', err => {
 const app = express()
 const issue2options = {
     origin: true,
-    methods: ["POST"],
+    methods: ["POST"/* , "GET", "PUT", "DELETE", "PATCH" */],
     credentials: true,
     maxAge: 3600
 };
@@ -100,7 +100,16 @@ app.post("/login", async (req, res) => {
     })
 
 })
-
+app.get("/information", authenticateToken, async (req, res) => {
+    const { user } = req.user
+    const info = await User.findById(user?._id).select({
+        password: 0
+    })
+    return res.status(200).json({
+        error: false,
+        data: info
+    })
+})
 
 // CRUD
 app.post("/note", authenticateToken, async (req, res) => {
