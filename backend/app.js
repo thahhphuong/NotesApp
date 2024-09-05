@@ -201,6 +201,32 @@ app.delete("/note/:id", authenticateToken, async (req, res) => {
         })
     }
 })
+// update isPinned
+app.patch("/pin-note/:id", authenticateToken, async (req, res) => {
+    const { id } = req.params
+    const { isPinned } = req.body
+    const { user } = req.user
+    const note = await Note.findById(id)
+    if (typeof isPinned != "boolean") {
+        return res.status(400).json({
+            error: true,
+            message: 'type must be boolean'
+        })
+    }
+    if (!note) {
+        return res.status(400).json({
+            error: true, message: "Cannot find note"
+        })
+    }
+    await Note.updateOne({ _id: id, userId: user?._id }, {
+        $set: {
+            isPinned: isPinned
+        }
+    })
+    return res.status(200).json({
+        error: false, message: "Update ispinned successfully"
+    })
+})
 app.listen(3000, () => {
     console.log("app listening on port 3000")
 })
