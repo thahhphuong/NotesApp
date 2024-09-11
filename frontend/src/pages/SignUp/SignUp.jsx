@@ -1,9 +1,14 @@
 import React, { useState } from "react";
 import Navbar from "../../components/Navbar/Navbar";
 import PasswordInput from "../../components/Password/PasswordInput";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { validateEmail } from "../../utils/helper";
+import axisoInstance from "../../utils/aixosInstance";
+import { BASE_URL } from "../../utils/constants";
 
 const SignUp = () => {
+	const navigite = useNavigate();
+
 	const [name, setName] = useState("");
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
@@ -24,6 +29,20 @@ const SignUp = () => {
 			return;
 		}
 		setError("");
+
+		try {
+			const response = await axisoInstance.post(`${BASE_URL}/register`, {
+				email: email,
+				fullName: name,
+				password: password,
+			});
+			if (response.data) {
+				localStorage.setItem("token", data.accessToken);
+				navigite("/");
+			}
+		} catch (error) {
+			setError(error);
+		}
 	};
 	return (
 		<>

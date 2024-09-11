@@ -20,13 +20,17 @@ axisoInstance.interceptors.request.use(function (config) {
 });
 
 // Add a response interceptor
-// axios.interceptors.response.use(function (response) {
-//     // Any status code that lie within the range of 2xx cause this function to trigger
-//     // Do something with response data
-//     return response;
-// }, function (error) {
-//     // Any status codes that falls outside the range of 2xx cause this function to trigger
-//     // Do something with response error
-//     return Promise.reject(error);
-// });
+axisoInstance.interceptors.response.use(function (response) {
+    // Any status code that lie within the range of 2xx cause this function to trigger
+    // Do something with response data
+    return response;
+}, function (error) {
+    // Any status codes that falls outside the range of 2xx cause this function to trigger
+    // Do something with response error
+    const messageError = error?.response?.data?.message
+    if (messageError) {
+        return Promise.reject(messageError);
+    }
+    return Promise.reject(error);
+});
 export default axisoInstance
