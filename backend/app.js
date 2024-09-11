@@ -52,19 +52,22 @@ app.post('/register', async (req, res) => {
                 message: "user already exist"
             })
         }
-        const newUser = new User({
+        const user = new User({
             fullName, email, password
         })
-        await newUser.save()
-
+        await user.save()
+        const accessToken = jwt.sign({ user }, process.env.ACCESS_TOKEN, {
+            expiresIn: "8h"
+        })
         return res.status(200).json({
             error: false, data: {
-                newUser
+                user,
+                accessToken
             },
             message: "Register success"
         })
     } catch (error) {
-        return res.status(400).json({ error: error?.message })
+        return res.status(400).json({ error: true, message: error?.message })
     }
 })
 app.post("/login", async (req, res) => {
@@ -179,7 +182,8 @@ app.put("/note/:id", authenticateToken, async (req, res) => {
 
 app.get("/note", authenticateToken, async (req, res) => {
     const { skip = 0, limit = 10 } = req.query
-    const notes = await Note.find().skip(+skip).limit(+limit).sort({ created: -1 })
+    const { user } = req.user
+    const notes = await Note.find({ userId: user?._id }).skip(+skip).limit(+limit).sort({ created: -1 })
     return res.status(200).json({
         error: true,
         data: notes
