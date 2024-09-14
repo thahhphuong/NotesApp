@@ -15,7 +15,7 @@ mongoose.connection.on('error', err => {
 const app = express()
 const issue2options = {
     origin: true,
-    methods: ["POST"/* , "GET", "PUT", "DELETE", "PATCH" */],
+    methods: ["POST", "PUT"/* , "GET", "PUT", "DELETE", "PATCH" */],
     credentials: true,
     maxAge: 3600
 };

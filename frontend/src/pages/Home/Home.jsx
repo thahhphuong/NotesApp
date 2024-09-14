@@ -9,20 +9,21 @@ import { BASE_URL } from "../../utils/constants";
 import { useNavigate } from "react-router-dom";
 import axisoInstance from "../../utils/aixosInstance";
 import moment from "moment";
+import { toast, ToastContainer } from "react-toastify";
 const Home = () => {
 	let subtitle;
 	const navigite = useNavigate();
 
-	const [modalIsOpen, setIsOpen] = useState(false);
+	const [modalIsOpen, setIsOpenModal] = useState({
+		isOpen: false,
+		type: "add",
+		data: null,
+	});
 	const [user, setUser] = useState(null);
 	const [notes, allNotes] = useState([]);
+	const [modalData, setModaldata] = useState(null);
 
-	const openModal = () => {
-		setIsOpen(true);
-	};
-	const closeModal = () => {
-		setIsOpen(false);
-	};
+	const notify = () => toast.warn("Token invalid");
 
 	const customStyles = {
 		content: {
@@ -42,9 +43,8 @@ const Home = () => {
 			if (data) {
 				setUser(response.data);
 			}
-		} catch (error) {
-			console.log(error);
-		}
+			// console.log({ data });
+		} catch (error) {}
 	};
 	// get all notes
 	const getListNote = async () => {
@@ -55,7 +55,10 @@ const Home = () => {
 				allNotes(data);
 			}
 		} catch (error) {
-			console.log(error);
+			if (error.error && error.message) {
+				// notify();
+				navigite("/login");
+			}
 		}
 	};
 	useEffect(() => {
@@ -66,7 +69,6 @@ const Home = () => {
 	return (
 		<>
 			<Navbar userInfo={user} />
-
 			<div className="container mx-auto">
 				<div className="grid grid-cols-3 gap-4 mt-8">
 					{notes.map((e, i) => (
@@ -79,24 +81,53 @@ const Home = () => {
 							onPinNote={() => {}}
 							tags={"#tag"}
 							onDelete={() => {}}
-							onEdit={() => {}}
+							onEdit={() => {
+								setIsOpenModal({
+									isOpen: true,
+									type: "edit",
+									data: null,
+								}),
+									setModaldata(e);
+							}}
 							onCreate={() => {}}
 						/>
 					))}
 				</div>
 			</div>
-			<button className="w-16 h-16 flex items-center justify-center rounded bg-purple-400 absolute right-10 bottom-2" onClick={openModal}>
+			<button
+				className="w-16 h-16 flex items-center justify-center rounded bg-purple-400 absolute right-10 bottom-2"
+				onClick={() => {
+					setIsOpenModal({
+						isOpen: true,
+						type: "add",
+						data: null,
+					}),
+						setModaldata("");
+				}}
+			>
 				<MdAdd className="text-[32px] text-white" />
 			</button>
 			<Modal
-				isOpen={modalIsOpen}
+				isOpen={modalIsOpen.isOpen}
 				ariaHideApp={false}
 				onAfterOpen={afterOpenModal}
-				onRequestClose={closeModal}
+				onRequestClose={() =>
+					setIsOpenModal({
+						data: null,
+						type: "close",
+						isOpen: false,
+					})
+				}
 				style={customStyles}
 				contentLabel="Example Modal"
 			>
-				<AddNote />
+				<AddNote
+					noteData={modalData}
+					onClose={() => {
+						setIsOpenModal({ data: null, type: "close", isOpen: false }), setModaldata("");
+					}}
+					type={modalIsOpen.type}
+				/>
 			</Modal>
 		</>
 	);

@@ -3,11 +3,19 @@ import axisoInstance from "../../utils/aixosInstance";
 import { BASE_URL } from "../../utils/constants";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-function AddNote() {
-	const [title, setTitle] = useState("");
-	const [content, setContent] = useState("");
-	const [tags, setTags] = useState([]);
+function AddNote({ type, noteData, onClose, noteId }) {
+	const [title, setTitle] = useState(noteData?.title || "");
+	const [content, setContent] = useState(noteData?.content || "");
+	const [tags, setTags] = useState(noteData?.tags || []);
+	const [error, setError] = useState(noteData?.tags || []);
+	// console.log(type);
 	const notify = () => toast.info("Create successfully");
+	const notifyEdit = () =>
+		toast.info("Update successfully", {
+			delay: 1000,
+		});
+
+	//add note
 	const addNote = async () => {
 		try {
 			const response = await axisoInstance.post(`${BASE_URL}/note`, {
@@ -18,9 +26,27 @@ function AddNote() {
 			if (response.data) {
 				notify();
 			}
-			console.log({ title, content, tags });
 		} catch (error) {
-			console.log(error);
+			if (error?.message) {
+				setError(error?.message);
+			}
+		}
+	};
+	// edit not
+	const ediNote = async () => {
+		const noteId = noteData?._id;
+		try {
+			const response = await axisoInstance.put(`${BASE_URL}/note/` + noteId, {
+				title,
+				content,
+				tags,
+			});
+			if (response.data) {
+				notifyEdit();
+			}
+			// console.log({ title, content, tags });
+		} catch (error) {
+			// console.log(error);
 		}
 	};
 	return (
@@ -57,8 +83,9 @@ function AddNote() {
 					#TAGS
 				</label>
 			</div>
-			<button className="btn-primary font-medium mt-4 p-3" onClick={addNote}>
-				add
+			{error && <p className="text-red-600"> {error}</p>}
+			<button className="btn-primary font-medium mt-4 p-3" onClick={type == "add" ? addNote : ediNote}>
+				{type == "add" ? "ADD" : "EDIT"}
 			</button>
 			<ToastContainer />
 		</div>

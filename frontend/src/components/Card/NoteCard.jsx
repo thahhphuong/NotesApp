@@ -11,6 +11,7 @@ function NoteCard({ title, content, date, tags, isPinned, onEdit, onCreate, onDe
 				<MdOutlinePushPin className={`icon-btn ${isPinned ? "text-primary" : "text-white"}`} onClick={onPinNote} />
 			</div>
 			<p className=""> {content}</p>
+
 			<div className="flex items-center justify-between mt-2">
 				<div className=" text-xs text-slate-500">{tags}</div>
 				<div className="flex items-center gap-2">

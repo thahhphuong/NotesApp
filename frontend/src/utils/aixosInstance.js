@@ -27,7 +27,7 @@ axisoInstance.interceptors.response.use(function (response) {
 }, function (error) {
     // Any status codes that falls outside the range of 2xx cause this function to trigger
     // Do something with response error
-    const messageError = error?.response?.data?.message
+    const messageError = error?.response?.data
     if (messageError) {
         return Promise.reject(messageError);
     }
