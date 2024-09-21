@@ -8,7 +8,7 @@ import { BASE_URL } from "../../utils/constants";
 const Login = () => {
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
-	const [error, setError] = useState(false);
+	const [error, setError] = useState("");
 	const navigite = useNavigate();
 	const handleLogin = async (e) => {
 		e.preventDefault();

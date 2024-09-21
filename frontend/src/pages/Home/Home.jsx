@@ -10,6 +10,8 @@ import { useNavigate } from "react-router-dom";
 import axisoInstance from "../../utils/aixosInstance";
 import moment from "moment";
 import { toast, ToastContainer } from "react-toastify";
+import Swal from "sweetalert2";
+import withReactContent from "sweetalert2-react-content";
 const Home = () => {
 	let subtitle;
 	const navigite = useNavigate();
@@ -22,6 +24,7 @@ const Home = () => {
 	const [user, setUser] = useState(null);
 	const [notes, allNotes] = useState([]);
 	const [modalData, setModaldata] = useState(null);
+	// const [deleteNote, setDeleteNote] = useState(false);
 
 	const notify = () => toast.warn("Token invalid");
 
@@ -61,6 +64,45 @@ const Home = () => {
 			}
 		}
 	};
+	// delete note
+	const handleDeleteNote = async (noteId) => {
+		try {
+			const response = await axisoInstance.delete(`${BASE_URL}/note/` + noteId);
+			// if (!response.data?.error) {
+			// 	console.log("vo dat ?");
+			// 	setDeleteNote("true");
+			// }
+			setDeleteNote("true");
+		} catch (error) {
+			console.log("deleltError: ", error);
+		}
+	};
+
+	const handleDeleteNoteSwal = (title) => {
+		withReactContent(Swal)
+			.fire({
+				title: "<h5 style='color:red'>" + title + "</h5>",
+				text: "Do you want to delete this note? ",
+				showCancelButton: true,
+				confirmButtonText: "Delete note",
+				confirmButtonColor: "#d33",
+				cancelButtonColor: "#6e7d88",
+			})
+			.then((result) => {
+				/* Read more about isConfirmed, isDenied below */
+				if (result.isConfirmed) {
+					handleDeleteNote(id);
+					Swal.fire({
+						title: "delete successfully",
+						icon: "success",
+					}).then((button) => {
+						if (button.isConfirmed) {
+							location.reload();
+						}
+					});
+				}
+			});
+	};
 	useEffect(() => {
 		userInfo();
 		getListNote();
@@ -80,7 +122,9 @@ const Home = () => {
 							isPinned={true}
 							onPinNote={() => {}}
 							tags={"#tag"}
-							onDelete={() => {}}
+							onDelete={() => {
+								handleDeleteNoteSwal(e.title);
+							}}
 							onEdit={() => {
 								setIsOpenModal({
 									isOpen: true,

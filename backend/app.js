@@ -15,7 +15,7 @@ mongoose.connection.on('error', err => {
 const app = express()
 const issue2options = {
     origin: true,
-    methods: ["POST", "PUT"/* , "GET", "PUT", "DELETE", "PATCH" */],
+    methods: ["POST", "PUT", "DELETE"/* , "GET", "PUT", "DELETE", "PATCH" */],
     credentials: true,
     maxAge: 3600
 };
@@ -211,7 +211,7 @@ app.delete("/note/:id", authenticateToken, async (req, res) => {
         }
         await Note.deleteOne({ _id: id })
         return res.status(200).json({
-            error: true,
+            error: false,
             message: "delete success"
         })
     } catch (error) {
