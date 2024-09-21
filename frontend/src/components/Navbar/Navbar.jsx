@@ -3,15 +3,20 @@ import Profile from "../Card/Profile";
 import { useNavigate } from "react-router-dom";
 import SearchBar from "../SearchBar/SearchBar";
 
-function Navbar({ userInfo }) {
+function Navbar({ userInfo, onSearchNote, handleOnclearSearch }) {
 	const navigite = useNavigate();
 	const [search, setSearch] = useState("");
 	const onLogout = () => {
 		navigite("/login");
 	};
-	const handleSearch = () => {};
+	const handleSearch = () => {
+		if (search) {
+			onSearchNote(search);
+		}
+	};
 	const onClearSearch = () => {
 		setSearch("");
+		handleOnclearSearch();
 	};
 	return (
 		<div className="navbar bg-white items-center justify-between px-6 py-2">

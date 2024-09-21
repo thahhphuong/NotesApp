@@ -74,7 +74,7 @@ const Home = () => {
 	// delete note
 	const handleDeleteNote = async (noteId) => {
 		try {
-			const response = await axisoInstance.delete(`${BASE_URL}/note/` + noteId);
+			/* const response =  */ await axisoInstance.delete(`${BASE_URL}/note/` + noteId);
 			setDeleteNote("true");
 		} catch (error) {
 			console.log("deleltError: ", error);
@@ -119,6 +119,23 @@ const Home = () => {
 			message: "",
 		});
 	};
+	// search
+	const handleSearch = async (query) => {
+		try {
+			const response = await axisoInstance.get(`${BASE_URL}/search`, {
+				params: { query },
+			});
+			const { data } = response.data;
+			if (data) {
+				allNotes(data);
+			}
+		} catch (error) {
+			console.log(error);
+		}
+	};
+	const handleOnclearSearch = () => {
+		getListNote();
+	};
 	useEffect(() => {
 		userInfo();
 		getListNote();
@@ -126,10 +143,10 @@ const Home = () => {
 	}, []);
 	return (
 		<>
-			<Navbar userInfo={user} />
+			<Navbar userInfo={user} onSearchNote={handleSearch} handleOnclearSearch={handleOnclearSearch} />
 			<div className="container mx-auto">
 				<div className="grid grid-cols-3 gap-4 mt-8">
-					{notes.length > 0 ? (
+					{notes?.length > 0 ? (
 						notes.map((e, i) => (
 							<NoteCard
 								key={e._id}
