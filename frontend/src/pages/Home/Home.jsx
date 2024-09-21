@@ -12,6 +12,9 @@ import moment from "moment";
 import { toast, ToastContainer } from "react-toastify";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
+import Toast from "../../components/Toast/Toast";
+import EmptyCard from "../../components/Card/EmptyCard";
+import NoteImage from "../../assets/emptynote.png";
 const Home = () => {
 	let subtitle;
 	const navigite = useNavigate();
@@ -26,7 +29,11 @@ const Home = () => {
 	const [modalData, setModaldata] = useState(null);
 	// const [deleteNote, setDeleteNote] = useState(false);
 
-	const notify = () => toast.warn("Token invalid");
+	const [showToastMsg, setShowToastMsg] = useState({
+		isShowToast: false,
+		type: "add",
+		message: "",
+	});
 
 	const customStyles = {
 		content: {
@@ -68,10 +75,6 @@ const Home = () => {
 	const handleDeleteNote = async (noteId) => {
 		try {
 			const response = await axisoInstance.delete(`${BASE_URL}/note/` + noteId);
-			// if (!response.data?.error) {
-			// 	console.log("vo dat ?");
-			// 	setDeleteNote("true");
-			// }
 			setDeleteNote("true");
 		} catch (error) {
 			console.log("deleltError: ", error);
@@ -103,6 +106,19 @@ const Home = () => {
 				}
 			});
 	};
+	const handleShowToastMessage = (message, type) => {
+		setShowToastMsg({
+			isShowToast: false,
+			message: message,
+			type: type,
+		});
+	};
+	const handleCloseToast = () => {
+		setShowToastMsg({
+			isShowToast: false,
+			message: "",
+		});
+	};
 	useEffect(() => {
 		userInfo();
 		getListNote();
@@ -113,29 +129,33 @@ const Home = () => {
 			<Navbar userInfo={user} />
 			<div className="container mx-auto">
 				<div className="grid grid-cols-3 gap-4 mt-8">
-					{notes.map((e, i) => (
-						<NoteCard
-							key={e._id}
-							title={e.title}
-							content={e.content}
-							date={moment(e.created).format("DD/MM/YYYY")}
-							isPinned={true}
-							onPinNote={() => {}}
-							tags={"#tag"}
-							onDelete={() => {
-								handleDeleteNoteSwal(e.title);
-							}}
-							onEdit={() => {
-								setIsOpenModal({
-									isOpen: true,
-									type: "edit",
-									data: null,
-								}),
-									setModaldata(e);
-							}}
-							onCreate={() => {}}
-						/>
-					))}
+					{notes.length > 0 ? (
+						notes.map((e, i) => (
+							<NoteCard
+								key={e._id}
+								title={e.title}
+								content={e.content}
+								date={moment(e.created).format("DD/MM/YYYY")}
+								isPinned={true}
+								onPinNote={() => {}}
+								tags={"#tag"}
+								onDelete={() => {
+									handleDeleteNoteSwal(e.title);
+								}}
+								onEdit={() => {
+									setIsOpenModal({
+										isOpen: true,
+										type: "edit",
+										data: null,
+									}),
+										setModaldata(e);
+								}}
+								onCreate={() => {}}
+							/>
+						))
+					) : (
+						<EmptyCard src={NoteImage} message={"Start creating your first note ! Click the Add button to jot down your throught ...."} />
+					)}
 				</div>
 			</div>
 			<button
@@ -171,8 +191,10 @@ const Home = () => {
 						setIsOpenModal({ data: null, type: "close", isOpen: false }), setModaldata("");
 					}}
 					type={modalIsOpen.type}
+					// handleShowToastMessage()
 				/>
 			</Modal>
+			<Toast isShow={showToastMsg.isShowToast} message={showToastMsg.message} type={showToastMsg.type} onClose={handleCloseToast} />
 		</>
 	);
 };
