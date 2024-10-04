@@ -66,7 +66,6 @@ const Home = () => {
 			}
 		} catch (error) {
 			if (error.error && error.message) {
-				// notify();
 				navigite("/login");
 			}
 		}
@@ -75,13 +74,13 @@ const Home = () => {
 	const handleDeleteNote = async (noteId) => {
 		try {
 			/* const response =  */ await axisoInstance.delete(`${BASE_URL}/note/` + noteId);
-			setDeleteNote("true");
+			// setDeleteNote("true");
 		} catch (error) {
 			console.log("deleltError: ", error);
 		}
 	};
 
-	const handleDeleteNoteSwal = (title) => {
+	const handleDeleteNoteSwal = (title, id) => {
 		withReactContent(Swal)
 			.fire({
 				title: "<h5 style='color:red'>" + title + "</h5>",
@@ -130,7 +129,7 @@ const Home = () => {
 				allNotes(data);
 			}
 		} catch (error) {
-			console.log(error);
+			allNotes([]);
 		}
 	};
 	const handleOnclearSearch = () => {
@@ -139,7 +138,6 @@ const Home = () => {
 	useEffect(() => {
 		userInfo();
 		getListNote();
-		return () => {};
 	}, []);
 	return (
 		<>

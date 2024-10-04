@@ -6,12 +6,19 @@ const jwt = require("jsonwebtoken")
 const cors = require('cors')
 const { authenticateToken } = require('./untils/jwt')
 const Note = require('./models/note.model')
+const userRouter = require("./routes/user.router")
+const connectRedis = require("./services/connection.redis")
 require('dotenv').config()
 mongoose.connect(config.connectString)
 mongoose.connection.on('connected', () => console.log('connected'));
 mongoose.connection.on('error', err => {
-    console.log(err);
+    throw Error(err)
 });
+connectRedis.initRedis()
+// connectRedis.setRedis({ key: "testa", value: "seta", exTime: "100" })
+// connectRedis.deleteRedis({ key: "testa" })
+
+
 const app = express()
 const issue2options = {
     origin: true,
@@ -24,95 +31,96 @@ app.use(express.json())
 app.get('/', function (req, res) {
     res.send('Hello World')
 })
-app.post('/register', async (req, res) => {
-    try {
-        const { fullName, email, password } = req.body
-        if (!fullName) {
-            return res.status(400).json({
-                error: true,
-                message: "Fullname is required"
-            })
-        }
-        if (!email) {
-            return res.status(400).json({
-                error: true,
-                message: "email is required"
-            })
-        }
-        if (!password) {
-            return res.status(400).json({
-                error: true,
-                message: "password is required"
-            })
-        }
-        const isUser = await User.findOne({ email })
-        if (isUser) {
-            return res.status(400).json({
-                error: true,
-                message: "user already exist"
-            })
-        }
-        const user = new User({
-            fullName, email, password
-        })
-        await user.save()
-        const accessToken = jwt.sign({ user }, process.env.ACCESS_TOKEN, {
-            expiresIn: "8h"
-        })
-        return res.status(200).json({
-            error: false, data: {
-                user,
-                accessToken
-            },
-            message: "Register success"
-        })
-    } catch (error) {
-        return res.status(400).json({ error: true, message: error?.message })
-    }
-})
-app.post("/login", async (req, res) => {
-    const { email, password } = req.body
-    if (!email) {
-        return res.status(400).json({
-            error: true,
-            message: "email is required"
-        })
-    }
-    if (!password) {
-        return res.status(400).json({
-            error: true,
-            message: "password is required"
-        })
-    }
-    const user = await User.findOne({ email, password })
+app.use("/users", userRouter)
+// app.post('/register', async (req, res) => {
+//     try {
+//         const { fullName, email, password } = req.body
+//         if (!fullName) {
+//             return res.status(400).json({
+//                 error: true,
+//                 message: "Fullname is required"
+//             })
+//         }
+//         if (!email) {
+//             return res.status(400).json({
+//                 error: true,
+//                 message: "email is required"
+//             })
+//         }
+//         if (!password) {
+//             return res.status(400).json({
+//                 error: true,
+//                 message: "password is required"
+//             })
+//         }
+//         const isUser = await User.findOne({ email })
+//         if (isUser) {
+//             return res.status(400).json({
+//                 error: true,
+//                 message: "user already exist"
+//             })
+//         }
+//         const user = new User({
+//             fullName, email, password
+//         })
+//         await user.save()
+//         const accessToken = jwt.sign({ user }, process.env.ACCESS_TOKEN, {
+//             expiresIn: "8h"
+//         })
+//         return res.status(200).json({
+//             error: false, data: {
+//                 user,
+//                 accessToken
+//             },
+//             message: "Register success"
+//         })
+//     } catch (error) {
+//         return res.status(400).json({ error: true, message: error?.message })
+//     }
+// })
+// app.post("/login", async (req, res) => {
+//     const { email, password } = req.body
+//     if (!email) {
+//         return res.status(400).json({
+//             error: true,
+//             message: "email is required"
+//         })
+//     }
+//     if (!password) {
+//         return res.status(400).json({
+//             error: true,
+//             message: "password is required"
+//         })
+//     }
+//     const user = await User.findOne({ email, password })
 
-    if (!user) {
-        return res.status(400).json({
-            error: true, message: "User not found"
-        })
-    }
-    const accessToken = jwt.sign({ user }, process.env.ACCESS_TOKEN, {
-        expiresIn: "8h"
-    })
-    return res.status(200).json({
-        error: false, data: {
-            token: accessToken,
-            user
-        },
-        message: "Register success"
-    })
+//     if (!user) {
+//         return res.status(400).json({
+//             error: true, message: "User not found"
+//         })
+//     }
+//     const accessToken = jwt.sign({ user }, process.env.ACCESS_TOKEN, {
+//         expiresIn: "8h"
+//     })
+//     return res.status(200).json({
+//         error: false, data: {
+//             token: accessToken,
+//             user
+//         },
+//         message: "Register success"
+//     })
 
-})
-app.get("/information", authenticateToken, async (req, res) => {
-    const { user } = req.user
-    const info = await User.findById(user?._id).select({
-        password: 0
-    })
-    return res.status(200).json({
-        error: false,
-        data: info
-    })
-})
+// })
+// app.get("/information", authenticateToken, async (req, res) => {
+//     const { user } = req.user
+//     const info = await User.findById(user?._id).select({
+//         password: 0
+//     })
+//     return res.status(200).json({
+//         error: false,
+//         data: info
+//     })
+// })
 
 // CRUD
 app.post("/note", authenticateToken, async (req, res) => {
@@ -246,6 +254,42 @@ app.patch("/pin-note/:id", authenticateToken, async (req, res) => {
     return res.status(200).json({
         error: false, message: "Update ispinned successfully"
     })
+})
+// search
+app.get("/search", authenticateToken, async (req, res) => {
+    try {
+        const { query } = req.query
+        const { user } = req.user
+        const userId = user?._id
+        const note = await Note.find({
+            userId: userId,
+            $or: [
+                {
+                    content: { $regex: new RegExp(query, "i") }
+                },
+                {
+                    title: {
+                        $regex: new RegExp(query, "i")
+                    }
+                }]
+
+        })
+        if (!note.length) {
+            return res.status(400).json({
+                error: true, message: "Cannot find note"
+            })
+        }
+        return res.status(200).json({
+            error: false,
+            data: note,
+
+        })
+    } catch (error) {
+        return res.status(500).json({
+            error: true,
+            message: error?.messgae
+        })
+    }
 })
 app.listen(3000, () => {
     console.log("app listening on port 3000")
